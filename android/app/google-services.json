@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "888209306235",
+    "firebase_url": "https://measur-c1b58.firebaseio.com",
+    "project_id": "measur-c1b58",
+    "storage_bucket": "measur-c1b58.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:888209306235:android:32e24dea8b784fea53a8de",
+        "android_client_info": {
+          "package_name": "com.claver.measur"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "888209306235-n0u5nn3cbfni5okf2nbt0cqmsrs4ta7m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.claver.measur",
+            "certificate_hash": "ab10b9ae8e627993364e58ae306e838216997c3f"
+          }
+        },
+        {
+          "client_id": "888209306235-lbmusls9elhg6088g3baif05t3r43gc5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4BDnUGeYGf25pFp72q2u1iMq25Hcsuig"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "888209306235-lbmusls9elhg6088g3baif05t3r43gc5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
