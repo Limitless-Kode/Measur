@@ -5,7 +5,7 @@ class ValidateForm{
     Response response = Response();
     response.error = false;
     final phoneRegExp = RegExp(r"^[0-9]{10,13}$");
-    final fullNameRegExp = RegExp(r"^[A-z]{2,}\s[A-z]{2,}\s?[A-z]{2,}\s?[A-z]{2,}$");
+    final fullNameRegExp = RegExp(r"^[a-zA-Z]{4,}(?: [a-zA-Z]+){0,2}$");
     final addressRegExp = RegExp(r"(\w+){2,}");
 
     try{
@@ -16,7 +16,7 @@ class ValidateForm{
       }
       if(!fullNameRegExp.hasMatch(fullName)){
         response.error = true;
-        response.message = "Please enter surname, first and last name";
+        response.message = "Please Enter First and Last name";
         return response;
       }
       if(!addressRegExp.hasMatch(address)){

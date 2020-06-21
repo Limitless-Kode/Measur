@@ -27,27 +27,30 @@ class InfoTab extends StatelessWidget {
         return Container();
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(5),
-        color: color,
-      ),
-      margin: EdgeInsets.only(top: 10),
-      padding: EdgeInsets.symmetric(horizontal: 15),
-      height: 35,
+    return SizedBox(
       width: width,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              icon,
-              SizedBox(width: 10,),
-              Text(message, style: TextStyle(color: Colors.white), overflow: TextOverflow.ellipsis,),
-            ],
-          ),
-          waiting ? prefix : Container()
-        ],
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          color: color,
+        ),
+        margin: EdgeInsets.only(top: 10),
+        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 9),
+        height: 35,
+        width: width,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                icon,
+                SizedBox(width: 10,),
+                Text(message, style: TextStyle(color: Colors.white), overflow: TextOverflow.ellipsis,),
+              ],
+            ),
+            waiting ? prefix : Container()
+          ],
+        ),
       ),
     );
   }

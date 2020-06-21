@@ -28,6 +28,7 @@ class _ConfigureTasksState extends State<ConfigureTasks> {
   TimeOfDay endTime;
   TimeOfDay startTime;
   InfoMessage infoMessage = InfoMessage();
+  Timer _timer;
 
 
   @override
@@ -44,7 +45,9 @@ class _ConfigureTasksState extends State<ConfigureTasks> {
     }else if(task == null || task.trim() == ""){
       showMessage(message: "Task cannot be empty", type: "error");
     }else{
+      showMessage(message: "Adding Task", type: "info", waiting: true);
       DateTime pDate = DateTime.parse(date);
+
       await Provider.of<TaskProvider>(context, listen: false).addTask(
         startTime: DateTime(pDate.year, pDate.month, pDate.day, startTime.hour, startTime.minute),
         endTime: DateTime(pDate.year, pDate.month, pDate.day, endTime.hour, endTime.minute),
@@ -67,21 +70,32 @@ class _ConfigureTasksState extends State<ConfigureTasks> {
           body: "Hey it's time, you've got to switch now"
       );
 
+      showMessage(type: 'info', message: "Task added successfully");
+
     }
   }
 
-  showMessage({message, type}){
+  showMessage({message, type, waiting = false}){
     setState(() {
       infoMessage.type = type;
       infoMessage.message = message;
-      infoMessage.waiting =  false;
+      infoMessage.waiting =  waiting;
     });
 
-    Timer(Duration(seconds: 3),(){
+    _onMessageEnd();
+  }
+  _onMessageEnd(){
+    _timer = Timer(Duration(seconds: 3),(){
       setState(() {
         infoMessage.type = "";
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
   }
 
   Future<String> showPicker( bool first, BuildContext context) async {

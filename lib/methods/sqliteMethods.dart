@@ -1,15 +1,17 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:measur/methods/firebaseMethods.dart';
 import 'package:measur/methods/stringConstants.dart';
 import 'package:measur/models/Customer.dart';
 import 'package:measur/models/Dressmaker.dart';
 import 'package:measur/models/Project.dart';
 import 'package:measur/models/Response.dart';
+import 'package:measur/services/synchronization.service.dart';
 import 'package:measur/utils/database_helper.dart';
 
 class SQLiteMethods{
   DatabaseHelper _databaseHelper = DatabaseHelper();
+  
   FirebaseMethods _firebaseMethods = FirebaseMethods();
+  Synchronization synchronization = Synchronization();
 
   Future<Response> newDressmaker(Dressmaker dressmaker) async{
     final db = await _databaseHelper.database;
@@ -17,7 +19,7 @@ class SQLiteMethods{
 
     if(await _firebaseMethods.isConnected()){
       try{
-        Response createdUserResponse = await _firebaseMethods.createUser(dressmaker.fullName, email: dressmaker.email, password: dressmaker.password);
+        Response createdUserResponse = await _firebaseMethods.createUser(dressmaker.fullName, dressmaker.phone , email: dressmaker.email, password: dressmaker.password);
 
         if(!createdUserResponse.error){
           String uid = await _firebaseMethods.signIn(email: dressmaker.email, password: dressmaker.password);
@@ -50,6 +52,15 @@ class SQLiteMethods{
 
   }
 
+  Future<Response> setDressmaker() async{
+    final db = await _databaseHelper.database;
+    Response response = Response();
+    Map dressmaker = await _firebaseMethods.getUser();
+    await db.insert("dressmakers", dressmaker);
+    return response;
+  }
+
+
   Future<Response> newCustomer(Customer customer) async {
     Response response = Response();
     final db = await _databaseHelper.database;
@@ -73,18 +84,20 @@ class SQLiteMethods{
 
     if(await _firebaseMethods.isConnected()){
       if(!await _firebaseMethods.doesUserExist(_customer["phone"])) {
-        DocumentReference doc = await _firebaseMethods.addCustomer(_customer);
+        _customer[CUSTOMER_ID] = _firebaseMethods.generateId();
+        await _firebaseMethods.addCustomer(_customer);
         SQLcustomer[SYNC] = 1;
-        SQLcustomer[CUSTOMER_ID] = doc.documentID;
+        SQLcustomer[CUSTOMER_ID] = _customer[CUSTOMER_ID];
 
         //add to database
         SQLcustomer.remove("dressmakers");
         SQLcustomer[DATE_ADDED] = DateTime.now().toString();
         await db.insert("customers", SQLcustomer);
       }
+
     }else{
       SQLcustomer[SYNC] = 0;
-      SQLcustomer[CUSTOMER_ID] = "";
+      SQLcustomer[CUSTOMER_ID] = _firebaseMethods.generateId();
       SQLcustomer.remove("dressmakers");
       SQLcustomer[DATE_ADDED] = DateTime.now().toString();
       await db.insert("customers", SQLcustomer);
@@ -93,32 +106,49 @@ class SQLiteMethods{
     return response;
   }
 
+
   Future<Response> newProject(Project project) async{
     final db = await _databaseHelper.database;
     Response response = Response();
     project.dressmaker = await getDressmakerId();
     Map<String, dynamic> projectData = project.toMap(project);
-    projectData["tasks_completed"] = 0;
-    projectData["completed"] = false;
+    projectData[TASKS_COMPLETED] = 0;
+    projectData[COMPLETED] = false;
     projectData["tasks"] = [];
 
     if(await _firebaseMethods.isConnected()){
-      DocumentReference doc = await _firebaseMethods.addProject(projectData);
-      projectData[PROJECT_ID] = doc.documentID;
+      projectData[PROJECT_ID] = _firebaseMethods.generateId();
+      await _firebaseMethods.addProject(projectData);
 
       projectData[SYNC] = 1;
       projectData[START_DATE] = project.startDate.toString();
       projectData[END_DATE] = project.endDate.toString();
-      projectData["completed"] = 0;
+      projectData[COMPLETED] = 0;
       projectData.remove(DRESSMAKER);
       projectData.remove("tasks");
       await db.insert("projects", projectData);
     }else{
+      String projectID = _firebaseMethods.generateId();
+      projectData[PROJECT_ID] = projectID;
+      projectData[START_DATE] = project.startDate.toString();
+      projectData[END_DATE] = project.endDate.toString();
+      projectData[COMPLETED] = 0;
+      projectData.remove(DRESSMAKER);
+      projectData.remove("tasks");
       projectData[SYNC] = 0;
       await db.insert("projects", projectData);
     }
 
     response.message = "Project has been added";
+    return response;
+  }
+
+  Future<Response> setProject(Map project) async{
+    final db = await _databaseHelper.database;
+    Response response = Response();
+
+    await db.insert("projects", project);
+
     return response;
   }
 
@@ -132,23 +162,27 @@ class SQLiteMethods{
     Response response = Response();
     String formattedKey = key.trim().split(" ").join("_").toLowerCase();
 
+    String sql = isNumber ? "UPDATE projects SET $formattedKey = $parsedValue, $SYNC = 0 WHERE $PROJECT_ID = '$uid' "
+        : "UPDATE projects SET $formattedKey = '$parsedValue', $SYNC = 0 WHERE $PROJECT_ID = '$uid' ";
+
+    await db.rawQuery(sql);
+
     if(await _firebaseMethods.isConnected()){
-      String sql = isNumber ? "UPDATE projects SET $formattedKey = $parsedValue, $SYNC = 1 WHERE $PROJECT_ID = '$uid' "
-      : "UPDATE projects SET $formattedKey = '$parsedValue', $SYNC = 1 WHERE $PROJECT_ID = '$uid' ";
-      await db.rawQuery(sql);
-      await _firebaseMethods.updateProject(formattedKey, parsedValue, uid);
-
-      response.message = "$key has been updated";
-      response.error = false;
-
-    }else{
-
+      synchronization.initialize();
     }
+    response.message = "$key has been updated";
+    response.error = false;
 
     return response;
   }
 
   newTask(Map<String,dynamic> task) async{
+    final db = await _databaseHelper.database;
+    var response = await db.insert("tasks", task);
+    return response;
+  }
+
+  setTask(Map<String,dynamic> task) async{
     final db = await _databaseHelper.database;
     var response = await db.insert("tasks", task);
     return response;
@@ -166,6 +200,7 @@ class SQLiteMethods{
     await db.delete("projects");
     deleteAllTasks();
   }
+
   deleteAllTasks() async{
     final db = await _databaseHelper.database;
     await db.delete("tasks");
@@ -187,23 +222,26 @@ class SQLiteMethods{
     return tasks;
   }
 
-
   getCustomers() async{
     final db = await _databaseHelper.database;
     List<Map<String, dynamic>> customersList = await db.query("customers ORDER BY full_name ASC");
     return customersList;
   }
 
-  Future<Response> updateMeasurement(key, value, customer_id) async{
+  Future<Response> updateMeasurement(key, value, customerId) async{
+    String formattedKey = key.trim().split(" ").join("_").toLowerCase();
     Response response = Response();
+
     final db = await _databaseHelper.database;
+
+    await db.rawUpdate("UPDATE customers SET $formattedKey = $value, $SYNC = 0 WHERE $CUSTOMER_ID = '$customerId'");
+
     if(await _firebaseMethods.isConnected()){
-      response = await _firebaseMethods.updateMeasurement(key, value, customer_id);
-      await db.rawUpdate("UPDATE customers SET $key = value, $SYNC = 1 WHERE $CUSTOMER_ID = $customer_id");
-    }else{
-      await db.rawUpdate("UPDATE customers SET $key = value, $SYNC = 0 WHERE $CUSTOMER_ID = $customer_id");
+      synchronization.initialize();
     }
 
+    response.message = "$key has been updated";
+    return response;
   }
 
   Future<String> getDressmakerId() async{
@@ -212,4 +250,8 @@ class SQLiteMethods{
     return id;
   }
 
+  Future logout() async{
+    await _databaseHelper.deleteDB();
+    await _firebaseMethods.signOut();
+  }
 }

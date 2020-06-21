@@ -21,26 +21,16 @@ class FirebaseMethods{
     customers.documents.forEach((element){
       Map data;
       data = element.data;
-      data["docId"] = element.documentID;
+      data[CUSTOMER_ID] = element.documentID;
       response.add(data);
     });
 
     return response;
   }
 
-  Future<Response> updateMeasurement(String key, String value, String uid) async{
-    String formattedKey = key.trim().split(" ").join("_").toLowerCase();
-    return await db.collection(CUSTOMER).document(uid)
-    .updateData({formattedKey: double.parse(value)})
-    .then((res){
-      response.message = "$key has been updated";
-      response.error = false;
-      return response;
-    }).catchError((error){
-      response.message = error.message;
-      response.error = true;
-      return response;
-    });
+  updateMeasurement(String key, String value, String uid) async{
+    await db.collection(CUSTOMER).document(uid)
+    .updateData({key: double.parse(value)});
   }
 
   updateProject(String key, var value, String uid) async{
@@ -50,32 +40,33 @@ class FirebaseMethods{
   }
 
   Future addTask({projectId, Task task}) async{
-
-      final DocumentReference projectReference = db.collection("projects").document(projectId);
+      DocumentReference projectReference = db.collection("projects").document(projectId);
       final DocumentSnapshot projectSnapshot = await projectReference.get();
 
-      List tasks = projectSnapshot.data["tasks"];
+      //TODO: tasks overridden after project details update
+      List tasks = projectSnapshot?.data["tasks"] ?? [];
 
       Map data = task.toMap();
-      data["state"] = 0;
-      data["date_added"] = DateTime.now();
+      data[TASK_STATE] = 0;
+//      data[DATE_ADDED] = DateTime.now();
       tasks.add(data);
 
       //update tasks
-      projectReference.updateData({"tasks": tasks});
+      db.collection("projects").document(projectId)
+      .updateData({"tasks": tasks});
+
   }
 
   Future<DocumentReference> addCustomer(Map customer) async{
-      return await db.collection(CUSTOMER).add(customer).then((document){
-        return document;
-      });
+    await db.collection(CUSTOMER).document(customer[CUSTOMER_ID]).setData(customer);
   }
 
-  Future<DocumentReference> addProject(Map project) async{
-    return db.collection("projects").add(project)
-    .then((document) async{
-      return document;
-    });
+  addProject(Map project) async{
+    Map<String,dynamic> newProject = Map.from(project);
+    newProject.putIfAbsent("tasks", () => []);
+
+    await db.collection("projects").document(project[PROJECT_ID])
+    .setData(project);
   }
 
   Future<List<Map<String, dynamic>>> getProjects() async{
@@ -86,7 +77,7 @@ class FirebaseMethods{
 
 
     await collectionReference
-        .where("dressmaker", isEqualTo: dressmaker_uid).where("task_count", isGreaterThan: 0)
+        .where("dressmaker", isEqualTo: dressmaker_uid)
         .getDocuments().then((projects) async{
           await Future.forEach(projects.documents, (doc) async{
             completeProject = {};
@@ -136,7 +127,7 @@ class FirebaseMethods{
     return isConnected;
   }
 
-  Future<Response> createUser(fullName,{@required String email, @required String password}) async{
+  Future<Response> createUser(fullName, phone, {@required String email, @required String password}) async{
    try{
       if(email == null || email.trim() == ""){
         response.error = true;
@@ -189,4 +180,18 @@ class FirebaseMethods{
     }
     return false;
   }
+
+  String generateId() {
+    var _randomId = Firestore.instance.collection('').document().documentID;
+    return _randomId;
+  }
+
+  Future<Map<String, dynamic>> getUser() async{
+    FirebaseUser user = await _auth.currentUser();
+    DocumentSnapshot doc = await db.collection("dressmakers").document(user.uid).get();
+    Map response = doc.data;
+    response[DRESSMAKER_ID] = doc.documentID;
+    return response;
+  }
+
 }

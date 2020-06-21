@@ -107,19 +107,21 @@ class CurrentTask extends StatelessWidget {
     String duration = "";
 
     TimeOfDay startDate = TimeOfDay.fromDateTime(DateTime.parse(startTime));
-    TimeOfDay endDate = TimeOfDay.fromDateTime(DateTime.parse(endTime));
+  //  TimeOfDay endDate = TimeOfDay.fromDateTime(DateTime.parse(endTime));
+    TimeOfDay endDate = TimeOfDay.fromDateTime(DateTime.now());
 
     int _doubleStartDate = (startDate.hour * 60) + (startDate.minute);
     int _doubleEndDate = (endDate.hour * 60) + (endDate.minute);
 
-    int totalMinsLeft = _doubleEndDate - _doubleStartDate;
+    int totalMinsLeft = _doubleStartDate - _doubleEndDate;
     int hour = (totalMinsLeft / 60).floor();
     int mins = (totalMinsLeft % 60).floor();
 
-    hour >= 1 ?? hour == 1 ? duration += "1 hr " : hour == 0 ? "" : duration += "$hour hrs ";
-    mins != 0 ?? mins > 10 ? duration += "$mins mins" : duration += "0$mins mins";
+    hour >= 1 ?? hour == 1 ? duration += "1 hr " : hour == 0 ? duration+="" : hour < 1 ? "" : duration += "$hour hrs ";
+    mins != 0 ?? mins > 10 ? duration += "$mins mins" : mins == 0 ? duration += "" : duration += "0$mins mins";
 
 
     return duration;
   }
+  
 }

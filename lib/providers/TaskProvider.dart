@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:measur/extensions/dateExtensions.dart';
 import 'package:measur/methods/firebaseMethods.dart';
 import 'package:measur/methods/sqliteMethods.dart';
 import 'package:measur/methods/stringConstants.dart';
@@ -48,12 +47,12 @@ class TaskProvider with ChangeNotifier{
   }
 
   addTask({title,dateTime,endTime,startTime, projectId}) async{
-    Task task = Task(title: title,dateTime: DateTime.parse(dateTime), endTime: endTime, startTime: startTime,projectId: projectId);
+    Task task = Task(task_title: title,date_time: DateTime.parse(dateTime), end_time: endTime, start_time: startTime,project_id: projectId);
     Map SQLTask = task.toMap();
-    SQLTask[TASK_DATE] = task.dateTime.toString();
-    SQLTask[START_TIME] = task.startTime.toString();
-    SQLTask[END_TIME] = task.endTime.toString();
-    SQLTask[PROJECT_ID] = task.projectId.toString();
+    SQLTask[TASK_DATE] = task.date_time.toString();
+    SQLTask[START_TIME] = task.start_time.toString();
+    SQLTask[END_TIME] = task.end_time.toString();
+    SQLTask[PROJECT_ID] = task.project_id.toString();
     SQLTask[TASK_STATE] = 0;
 
     if(await firebaseMethods.isConnected()){

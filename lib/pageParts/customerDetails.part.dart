@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:measur/methods/firebaseMethods.dart';
 import 'package:measur/methods/stringConstants.dart';
 import 'package:measur/methods/stringMethods.dart';
 import 'package:measur/models/Customer.dart';
 import 'package:measur/models/Response.dart';
+import 'package:measur/providers/CustomerProvider.dart';
 import 'package:measur/widgets/dataCard.dart';
+import 'package:provider/provider.dart';
 import 'package:toast/toast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -125,12 +126,14 @@ class _CustomerDetailsState extends State<CustomerDetails> {
     Map customerInfo = {};
 
     customerInfo.addAll(widget.customer);
+    print(customerInfo[ACROSS_SHOULDER_FRONT]);
     Customer _customer = Customer();
 
     if(customerInfo[GENDER] == "male") customerInfo = _customer.toMaleMeasurement(customerInfo);
     else customerInfo = _customer.toFemaleMeasurement(customerInfo);
 
     customerInfo.forEach((key, value) {
+      //print("$key: $value");
       String formattedKey = stringMethods.formatKey(key);
       widgets.add(DataCard(
         title: formattedKey,
@@ -143,12 +146,9 @@ class _CustomerDetailsState extends State<CustomerDetails> {
   }
 
   modalCallBack(key , value) async{
-    FirebaseMethods _firebaseMethods = FirebaseMethods();
-
     Response response = Response();
 
-    //firebase update
-    response = await _firebaseMethods.updateMeasurement(key, value, widget.customer[CUSTOMER_ID]);
+    response = await Provider.of<CustomerProvider>(context, listen: false).updateMeasurement(key, value, widget.customer[CUSTOMER_ID]);
 
     Toast.show(response.message, context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM,
         backgroundColor: response.error ? Colors.red : Color(0xff150A42));

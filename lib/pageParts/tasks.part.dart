@@ -63,7 +63,6 @@ class _TasksState extends State<Tasks> {
                 TaskItemPart(),
               ],
             )
-
           ],
         ),
       ),

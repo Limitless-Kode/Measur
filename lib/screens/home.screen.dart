@@ -1,6 +1,7 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:measur/methods/firebaseMethods.dart';
+import 'package:measur/methods/sqliteMethods.dart';
 import 'package:measur/pageParts/customers.part.dart';
 import 'package:measur/pageParts/projects.part.dart';
 import 'package:measur/pageParts/tasks.part.dart';
@@ -12,6 +13,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final FirebaseMethods firebaseMethods = FirebaseMethods();
+  final SQLiteMethods _sqLiteMethods = SQLiteMethods();
   PageController pageController = PageController(initialPage: 1);
   int pageIndex = 1;
 
@@ -30,6 +32,7 @@ class _HomeState extends State<Home> {
         Icon(Icons.equalizer, size: 30, color: Colors.white,),
         Icon(Icons.dvr, size: 30, color: Colors.white,),
         Icon(Icons.people_outline, size: 30, color: Colors.white,),
+        Icon(Icons.settings, size: 30, color: Colors.white,),
       ],
       onTap: (index) {
         pageController.animateToPage(index, duration: Duration(milliseconds: 500), curve: Curves.ease);
@@ -50,7 +53,16 @@ class _HomeState extends State<Home> {
             children: <Widget>[
               Tasks(),
               Projects(),
-              Customers()
+              Customers(),
+              Container(
+                child: RaisedButton(
+                  child: Text("Logout"),
+                  onPressed: () async{
+                    await _sqLiteMethods.logout();
+                    Navigator.pushReplacementNamed(context, "/auth");
+                  },
+                )
+              )
             ],
           ),
         ),

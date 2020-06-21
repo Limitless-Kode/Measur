@@ -6,6 +6,7 @@ import 'package:measur/methods/firebaseMethods.dart';
 import 'package:measur/providers/CustomerProvider.dart';
 import 'package:measur/providers/ProjectProvider.dart';
 import 'package:measur/providers/TaskProvider.dart';
+import 'package:measur/services/synchronization.service.dart';
 import 'package:measur/widgets/customHeader.dart';
 import 'package:measur/widgets/projectCard.dart';
 import 'package:measur/widgets/projectStatisticsCard.dart';
@@ -20,11 +21,12 @@ class _ProjectsState extends State<Projects> {
   final db = Firestore.instance;
   FirebaseMethods firebaseMethods = FirebaseMethods();
   String currentUserID;
-
+  Synchronization synchronization = Synchronization();
 
 
   getCustomers() async{
     await Provider.of<CustomerProvider>(context, listen: false).getCustomers();
+    synchronization.getTasks();
   }
 
   getProjects() async{

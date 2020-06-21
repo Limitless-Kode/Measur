@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:measur/methods/sqliteMethods.dart';
 import 'package:measur/methods/stringConstants.dart';
 import 'package:measur/models/InfoMessage.dart';
@@ -92,12 +91,6 @@ class _UpdateProjectState extends State<UpdateProject> {
                         }
                       },
                     ),
-                    project[SYNC] == 1 ? Container()
-                        : SizedBox(
-                        width: width * 0.8,
-                        child: SubmitButton(label: "Synchronize", icon: Icon(Icons.update, color: Colors.white,), onPressed: ()=> null,)
-                    ),
-
                     Consumer<TaskProvider>(
                       builder: (context, provider, _){
                         return provider.tasks.where((task) => task[PROJECT_ID] == widget.projectData[PROJECT_ID]).length > 0 ? Container(
@@ -107,52 +100,56 @@ class _UpdateProjectState extends State<UpdateProject> {
                               SizedBox(height: 15,),
                               Column(
                                 children: provider.tasks.where((task) => task[PROJECT_ID] == widget.projectData[PROJECT_ID]).map((task) =>
-                                   Column(
-                                     children: <Widget>[
-                                       Container(
-                                         padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                                         child: Row(
-                                           crossAxisAlignment: CrossAxisAlignment.center,
-                                           mainAxisAlignment: MainAxisAlignment.start,
-                                           children: <Widget>[
-                                             Container(
-                                               height: 10,
-                                               width: 10,
-                                               decoration: BoxDecoration(
-                                                   borderRadius: BorderRadius.circular(10),
-                                                   color: task[TASK_STATE] == 0 ? Colors.blue : task[TASK_STATE] == 1 ? Colors.orange : Colors.green
-                                               ),
-                                               alignment: Alignment.centerLeft,
-                                             ),
-                                             SizedBox(width: 15),
-                                             Column(
-                                               crossAxisAlignment: CrossAxisAlignment.start,
-                                               mainAxisAlignment: MainAxisAlignment.center,
-                                               children: <Widget>[
-                                                 SizedBox(
-                                                   width: width * 0.7,
-                                                     child: Text(task[TASK_TITLE],
-                                                       overflow: TextOverflow.clip,
-                                                       style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),)
-                                                 ),
-                                                 SizedBox(height: 5,),
-                                                 Text("Today"),
-                                               ],
-                                             ),
-                                           ],
-                                         ),
-                                       ),
-                                       Divider()
-                                     ],
-                                   ),
+                                    Column(
+                                      children: <Widget>[
+                                        Container(
+                                          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                                          child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: <Widget>[
+                                              Container(
+                                                height: 10,
+                                                width: 10,
+                                                decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(10),
+                                                    color: task[TASK_STATE] == 0 ? Colors.blue : task[TASK_STATE] == 1 ? Colors.orange : Colors.green
+                                                ),
+                                                alignment: Alignment.centerLeft,
+                                              ),
+                                              SizedBox(width: 15),
+                                              Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: <Widget>[
+                                                  SizedBox(
+                                                      width: width * 0.7,
+                                                      child: Text(task[TASK_TITLE],
+                                                        overflow: TextOverflow.clip,
+                                                        style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),)
+                                                  ),
+                                                  SizedBox(height: 5,),
+                                                  Text("Today"),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Divider()
+                                      ],
+                                    ),
                                 ).toList(),
                               )
                             ],
                           ),
                         ) : Container();
                       },
-                    )
-
+                    ),
+                    project[SYNC] == 1 ? Container()
+                        : SizedBox(
+                        width: width * 0.8,
+                        child: SubmitButton(label: "Synchronize", icon: Icon(Icons.update, color: Colors.white,), onPressed: ()=> null,)
+                    ),
                   ],
                 ),
               ),

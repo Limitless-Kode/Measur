@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:measur/methods/sqliteMethods.dart';
-import 'package:measur/methods/stringConstants.dart';
 
 class ProjectProvider with ChangeNotifier{
   SQLiteMethods _sqLiteMethods = SQLiteMethods();

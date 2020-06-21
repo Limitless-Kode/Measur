@@ -36,10 +36,12 @@ class _RegisterPartState extends State<RegisterPart> {
       });
       Navigator.pushReplacementNamed(context, "/home");
     }else{
-      _infoMessage.type = "error";
-      _infoMessage.waiting = false;
-      _infoMessage.message = response.message;
-      isButtonDisabled = false;
+      setState(() {
+        _infoMessage.type = "error";
+        _infoMessage.waiting = false;
+        _infoMessage.message = response.message;
+        isButtonDisabled = false;
+      });
     }
   }
 

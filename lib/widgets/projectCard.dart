@@ -19,7 +19,7 @@ class ProjectCard extends StatelessWidget {
   int getDaysLeft(){
     DateTime end = DateTime.parse(endDate);
     DateTime now = DateTime.now();
-    String nowStr = "${now.year}${now.month >= 10 ? now.month : "0${now.month}"}${now.day}";
+    String nowStr = "${now.year}${now.month >= 10 ? now.month : "0${now.month}"}${now.day >= 10 ? now.day : "0${now.day}"}";
     return end.difference(DateTime.parse(nowStr)).inDays;
   }
 

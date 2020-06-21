@@ -30,7 +30,7 @@ const PRIORITY = "priority";
 const EMAIL = "email";
 const PHONE = "phone";
 const FULL_NAME = "full_name";
-
+const PHOTO = "photo";
 const ACROSS_BACK = "across_back";
 const GENDER = "gender";
 const ACROSS_CHEST = "across_chest";

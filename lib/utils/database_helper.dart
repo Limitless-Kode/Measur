@@ -6,7 +6,8 @@ import 'package:sqflite/sqflite.dart';
 class DatabaseHelper{
   static DatabaseHelper _databaseHelper;
   static Database _database;
-
+  String path;
+  var dbRef;
 
   DatabaseHelper._createInstance();
 
@@ -17,12 +18,17 @@ class DatabaseHelper{
     return _databaseHelper;
   }
 
+  void deleteDB(){
+    dbRef.close();
+    deleteDatabase(path);
+  }
+
   Future<Database> initializeDatabase() async{
     Directory directory = await getApplicationDocumentsDirectory();
-    String path = directory.path + "measur.db";
+    path = directory.path + "measur.db";
 
     //open or create database
-    var dbRef = await openDatabase(path, version: 1, onCreate: _createTables);
+    dbRef = await openDatabase(path, version: 1, onCreate: _createTables);
     return dbRef;
   }
 
@@ -124,7 +130,7 @@ class DatabaseHelper{
   }
 
   Future<Database> get database async{
-    if(_database == null){
+    if(_database == null || !_database.isOpen){
       _database = await initializeDatabase();
     }
     return _database;

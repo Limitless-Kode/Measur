@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:measur/methods/firebaseMethods.dart';
+import 'package:measur/methods/sqliteMethods.dart';
 import 'package:measur/models/User.dart';
+import 'package:measur/services/synchronization.service.dart';
 import 'package:measur/widgets/infoTab.dart';
 
 class LoginPart extends StatefulWidget {
@@ -11,6 +13,9 @@ class LoginPart extends StatefulWidget {
 
 class _LoginPartState extends State<LoginPart> {
   FirebaseMethods firebaseMethods = FirebaseMethods();
+  Synchronization _synchronization = Synchronization();
+  SQLiteMethods _sqLiteMethods = SQLiteMethods();
+
   User user = User();
   bool isButtonDisabled = false;
   bool waiting = true;
@@ -34,7 +39,11 @@ class _LoginPartState extends State<LoginPart> {
       message = "We are authenticating you.";
     });
     String uid = await firebaseMethods.signIn(email: user.email, password: user.password);
+
     if(uid != null){
+      await _sqLiteMethods.setDressmaker();
+      await _synchronization.reinitialize();
+
       setState(() {
         message = "Redirecting...";
       });
